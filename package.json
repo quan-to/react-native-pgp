@@ -1,0 +1,9 @@
+{
+  "name": "react-native-pgp",
+  "version": "0.0.1",
+  "description": "Generate PGP Key with native modules",
+  "main": "index.js",
+  "repository": "git@github.com:quan-to/react-native-pgp.git",
+  "author": "Daniel Torres <danielfeelfine@gmail.com>",
+  "license": "MIT"
+}
