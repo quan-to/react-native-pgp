@@ -1,9 +1,17 @@
 {
   "name": "react-native-pgp",
   "version": "0.0.1",
-  "description": "Generate PGP Key with native modules",
+  "description": "React Native OpenPGP for iOS and Android",
   "main": "index.js",
-  "repository": "git@github.com:quan-to/react-native-pgp.git",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quan-to/react-native-pgp.git"
+  },
+  "keywords": [
+    "react-native",
+    "openpgp",
+    "pgp"
+  ],
   "author": "Daniel Torres <danielfeelfine@gmail.com>",
   "license": "MIT"
 }
