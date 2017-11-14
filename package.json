@@ -1,6 +1,6 @@
 {
   "name": "react-native-pgp",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "React Native OpenPGP for iOS and Android",
   "main": "index.js",
   "repository": {
