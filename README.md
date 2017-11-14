@@ -60,7 +60,7 @@ console.log(signed.asciiArmoredSignature); // "-----BEGIN PGP SIGNATURE----- ...
 
 * `generateKeyPair(userName, keyBits, keyPassword)` - Generates a public/private keyPair and encrypts the private key with specified password.
 * `signData(asciiArmoredPrivateKey, privateKeyPassword, dataToSign)` - Signs the data using the private key
-* `setHashingAlgo(hashingAlgo)` - Sets the hashing algorithm (check the )Constants_)
+* `setHashingAlgo(hashingAlgo)` - Sets the hashing algorithm (check the _Constants_)
 
 ### Erros
 
