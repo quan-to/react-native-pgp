@@ -1,6 +1,7 @@
 package com.quanto.rnpgp;
 
 import android.util.Base64;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.facebook.react.bridge.Arguments;
@@ -72,6 +73,7 @@ public class Module extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void generateKeyPair(String userId, int numBits, String passphrase, Promise promise) {
+    Log.d("ReactNativePGP", "generateKeyPair");
     try {
       WritableMap resultMap = Arguments.createMap();
       PGPKeyRingGenerator keyGenerator = generateKeyRingGenerator(userId, numBits, passphrase.toCharArray());
@@ -93,7 +95,6 @@ public class Module extends ReactContextBaseJavaModule {
       secretKeyRing.encode(armoredPrivOutputStream);
       armoredPrivOutputStream.close();
       resultMap.putString("privateKey", privateKeyOutputStream.toString("UTF-8"));
-
       resultMap.putString("fingerPrint", bytesToHex(secretKeyRing.getPublicKey().getFingerprint()));
 
       promise.resolve(resultMap);
@@ -114,7 +115,7 @@ public class Module extends ReactContextBaseJavaModule {
     return new String(hexChars);
   }
 
-  private final static PGPKeyRingGenerator generateKeyRingGenerator(String userId, int numBits, char[] passphrase)
+  private static PGPKeyRingGenerator generateKeyRingGenerator(String userId, int numBits, char[] passphrase)
     throws Exception
   {
     RSAKeyPairGenerator keyPairGenerator = new RSAKeyPairGenerator();
@@ -170,8 +171,8 @@ public class Module extends ReactContextBaseJavaModule {
 
     encryptHashGenerator.setKeyFlags(false, KeyFlags.ENCRYPT_COMMS | KeyFlags.ENCRYPT_STORAGE);
 
-    PGPDigestCalculator sha1DigestCalculator   = new BcPGPDigestCalculatorProvider().get(HashAlgorithmTags.SHA1);
     PGPDigestCalculator sha256DigestCalculator = new BcPGPDigestCalculatorProvider().get(HashAlgorithmTags.SHA256);
+    PGPDigestCalculator sha512DigestCalculator = new BcPGPDigestCalculatorProvider().get(HashAlgorithmTags.SHA512);
 
     PBESecretKeyEncryptor secretKeyEncryptor = (
       new BcPBESecretKeyEncryptorBuilder(PGPEncryptedData.AES_256, sha256DigestCalculator)
@@ -182,10 +183,10 @@ public class Module extends ReactContextBaseJavaModule {
       PGPSignature.NO_CERTIFICATION,
       rsaKeyPairSign,
       userId,
-      sha1DigestCalculator,
+      sha512DigestCalculator,
       signHashGenerator.generate(),
       null,
-      new BcPGPContentSignerBuilder(rsaKeyPairSign.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA1),
+      new BcPGPContentSignerBuilder(rsaKeyPairSign.getPublicKey().getAlgorithm(), HashAlgorithmTags.SHA512),
       secretKeyEncryptor
     );
 
