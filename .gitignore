@@ -30,3 +30,4 @@ local.properties
 #
 #node_modules/
 yarn-error.log
+android/build/

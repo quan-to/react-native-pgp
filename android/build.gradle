@@ -1,0 +1,46 @@
+import groovy.json.JsonSlurper
+
+def computeVersionName() {
+    // dynamically retrieve version from package.json
+    def slurper = new JsonSlurper()
+    def json = slurper.parse(file('../package.json'), "utf-8")
+    return json.version
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.0.0'
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '26.0.2'
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 26
+        versionCode 1
+        // get version name from package.json version
+        versionName computeVersionName()
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.facebook.react:react-native:+'
+    compile 'org.bouncycastle:bcprov-jdk15on:1.51'
+    compile 'org.bouncycastle:bcpg-jdk15on:1.51'
+}
