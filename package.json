@@ -10,8 +10,16 @@
   "keywords": [
     "react-native",
     "openpgp",
-    "pgp"
+    "pgp",
+    "library"
   ],
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest"
+  },
   "author": "Daniel Torres <danielfeelfine@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "peerDependencies": {
+    "react-native": ">=0.38.0"
+  }
 }
