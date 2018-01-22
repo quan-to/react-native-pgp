@@ -67,6 +67,29 @@ public class Module extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void signB64Data(final String privKeyData, final String password, final String b64Data, Promise promise) {
+    try {
+      // region Decode Base64
+      byte[] data = Base64.decode(b64Data, Base64.DEFAULT);
+      // endregion
+      // region Decode Private Key
+      PGPSecretKey secKey = PGPUtils.getSecretKey(privKeyData);
+      PGPPrivateKey privKey = PGPUtils.decryptArmoredPrivateKey(secKey, password);
+      // endregion
+      // region Sign Data
+      String signature = PGPUtils.signArmoredAscii(privKey, data, signatureAlgo);
+      WritableMap resultMap = Arguments.createMap();
+      resultMap.putString("asciiArmoredSignature", signature);
+      resultMap.putString("hashingAlgo",  PGPUtils.hashAlgoToString(signatureAlgo));
+      resultMap.putString("fingerPrint", Utils.bytesToHex(secKey.getPublicKey().getFingerprint()));
+      promise.resolve(resultMap);
+      // endregion
+    } catch (Exception e) {
+      promise.reject(e);
+    }
+  }
+
+  @ReactMethod
   public void setHashingAlgo(final int hashingAlgo) {
     String hashName = PGPUtils.hashAlgoToString(hashingAlgo); // Man, that's REALLY bad I know. Please FIXME
     if (hashName.equalsIgnoreCase("unknown")) {

@@ -39,4 +39,9 @@ class Utils {
     InputStream is = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8.name()));
     processStream(is, handler);
   }
+
+  static void processByteArrayAsStream(byte[] data, StreamHandler handler) throws IOException {
+    InputStream is = new ByteArrayInputStream(data);
+    processStream(is, handler);
+  }
 }

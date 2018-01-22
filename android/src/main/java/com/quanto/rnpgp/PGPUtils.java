@@ -121,6 +121,26 @@ class PGPUtils {
     return signature;
   }
 
+  static String signArmoredAscii(PGPPrivateKey privateKey, byte[] data, int signatureAlgo) throws IOException, PGPException {
+    String signature = null;
+    final PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(privateKey.getPublicKeyPacket().getAlgorithm(), signatureAlgo));
+    signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, privateKey);
+    ByteArrayOutputStream signatureOutput = new ByteArrayOutputStream();
+    try( BCPGOutputStream outputStream = new BCPGOutputStream( new ArmoredOutputStream(signatureOutput)) ) {
+      Utils.processByteArrayAsStream(data, new StreamHandler() {
+        @Override
+        public void handleStreamBuffer(byte[] buffer, int offset, int length) throws IOException {
+          signatureGenerator.update(buffer, offset, length);
+        }
+      });
+      signatureGenerator.generate().encode(outputStream);
+    }
+
+    signature = new String(signatureOutput.toByteArray(), "UTF-8");
+
+    return signature;
+  }
+
   static PGPKeyRingGenerator generateKeyRingGenerator(String userId, int numBits, char[] passphrase) throws Exception  {
     RSAKeyPairGenerator keyPairGenerator = new RSAKeyPairGenerator();
 
