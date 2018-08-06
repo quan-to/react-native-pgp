@@ -100,6 +100,23 @@ public class Module extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void changeKeyPassword(final String key, final String oldPassword, final String newPassword, Promise promise) {
+    try {
+      // region Decode Base64
+      PGPSecretKey secKey = PGPUtils.getSecretKey(key);
+      // endregion
+      PGPSecretKey reencryptedKey = PGPUtils.reencryptArmoredPrivateKey(secKey, oldPassword, newPassword);
+      ByteArrayOutputStream privateKeyOutputStream = new ByteArrayOutputStream();
+      ArmoredOutputStream armoredPrivOutputStream  = new ArmoredOutputStream(privateKeyOutputStream);
+      reencryptedKey.encode(armoredPrivOutputStream);
+      armoredPrivOutputStream.close();
+      promise.resolve(privateKeyOutputStream.toString("UTF-8"));
+    } catch (Exception e) {
+      promise.reject(e);
+    }
+  }
+
+  @ReactMethod
   public void generateKeyPair(final String userId, final int numBits, final String passphrase, Promise promise) {
     Log.d("ReactNativePGP", "generateKeyPair");
     try {

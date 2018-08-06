@@ -101,6 +101,18 @@ class PGPUtils {
     return  secretKey.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(password.toCharArray()));
   }
 
+  static PGPSecretKey reencryptArmoredPrivateKey(PGPSecretKey secretKey, String oldPassword, String newPassword) throws IOException, PGPException {
+    PBESecretKeyEncryptor secretKeyEncryptor = (
+            new BcPBESecretKeyEncryptorBuilder(PGPEncryptedData.AES_256, new BcPGPDigestCalculatorProvider().get(HashAlgorithmTags.SHA512))
+    ).build(newPassword.toCharArray());
+
+    return PGPSecretKey.copyWithNewPassword(
+            secretKey,
+            new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(oldPassword.toCharArray()),
+            secretKeyEncryptor
+    );
+  }
+
   static String signArmoredAscii(PGPPrivateKey privateKey, String data, int signatureAlgo) throws IOException, PGPException {
     String signature = null;
     final PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(privateKey.getPublicKeyPacket().getAlgorithm(), signatureAlgo));
