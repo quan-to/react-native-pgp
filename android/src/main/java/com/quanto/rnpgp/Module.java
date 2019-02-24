@@ -49,8 +49,10 @@ public class Module extends ReactContextBaseJavaModule {
   @ReactMethod
   public void signData(final String privKeyData, final String password, final String data, Promise promise) {
     try {
+      // Fix Private Key from iOS version that includes Public Key at the start
+      string privKeyDataFixed = privKeyData.replaceAll("-----BEGIN PGP PUBLIC KEY BLOCK-----[\\s\\S]*-----END PGP PUBLIC KEY BLOCK-----", "");
       // region Decode Private Key
-      PGPSecretKey secKey = PGPUtils.getSecretKey(privKeyData);
+      PGPSecretKey secKey = PGPUtils.getSecretKey(privKeyDataFixed);
       PGPPrivateKey privKey = PGPUtils.decryptArmoredPrivateKey(secKey, password);
       // endregion
       // region Sign Data
@@ -69,11 +71,13 @@ public class Module extends ReactContextBaseJavaModule {
   @ReactMethod
   public void signB64Data(final String privKeyData, final String password, final String b64Data, Promise promise) {
     try {
+      // Fix Private Key from iOS version that includes Public Key at the start
+      string privKeyDataFixed = privKeyData.replaceAll("-----BEGIN PGP PUBLIC KEY BLOCK-----[\\s\\S]*-----END PGP PUBLIC KEY BLOCK-----", "");
       // region Decode Base64
       byte[] data = Base64.decode(b64Data, Base64.DEFAULT);
       // endregion
       // region Decode Private Key
-      PGPSecretKey secKey = PGPUtils.getSecretKey(privKeyData);
+      PGPSecretKey secKey = PGPUtils.getSecretKey(privKeyDataFixed);
       PGPPrivateKey privKey = PGPUtils.decryptArmoredPrivateKey(secKey, password);
       // endregion
       // region Sign Data
@@ -102,8 +106,11 @@ public class Module extends ReactContextBaseJavaModule {
   @ReactMethod
   public void changeKeyPassword(final String key, final String oldPassword, final String newPassword, Promise promise) {
     try {
+      // Fix Private Key from iOS version that includes Public Key at the start
+      string privKeyDataFixed = key.replaceAll("-----BEGIN PGP PUBLIC KEY BLOCK-----[\\s\\S]*-----END PGP PUBLIC KEY BLOCK-----", "");
+
       // region Decode Base64
-      PGPSecretKey secKey = PGPUtils.getSecretKey(key);
+      PGPSecretKey secKey = PGPUtils.getSecretKey(privKeyDataFixed);
       // endregion
       PGPSecretKey reencryptedKey = PGPUtils.reencryptArmoredPrivateKey(secKey, oldPassword, newPassword);
       ByteArrayOutputStream privateKeyOutputStream = new ByteArrayOutputStream();
