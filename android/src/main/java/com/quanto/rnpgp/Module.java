@@ -50,7 +50,7 @@ public class Module extends ReactContextBaseJavaModule {
   public void signData(final String privKeyData, final String password, final String data, Promise promise) {
     try {
       // Fix Private Key from iOS version that includes Public Key at the start
-      string privKeyDataFixed = privKeyData.replaceAll("-----BEGIN PGP PUBLIC KEY BLOCK-----[\\s\\S]*-----END PGP PUBLIC KEY BLOCK-----", "");
+      String privKeyDataFixed = privKeyData.replaceAll("-----BEGIN PGP PUBLIC KEY BLOCK-----[\\s\\S]*-----END PGP PUBLIC KEY BLOCK-----", "");
       // region Decode Private Key
       PGPSecretKey secKey = PGPUtils.getSecretKey(privKeyDataFixed);
       PGPPrivateKey privKey = PGPUtils.decryptArmoredPrivateKey(secKey, password);
@@ -72,7 +72,7 @@ public class Module extends ReactContextBaseJavaModule {
   public void signB64Data(final String privKeyData, final String password, final String b64Data, Promise promise) {
     try {
       // Fix Private Key from iOS version that includes Public Key at the start
-      string privKeyDataFixed = privKeyData.replaceAll("-----BEGIN PGP PUBLIC KEY BLOCK-----[\\s\\S]*-----END PGP PUBLIC KEY BLOCK-----", "");
+      String privKeyDataFixed = privKeyData.replaceAll("-----BEGIN PGP PUBLIC KEY BLOCK-----[\\s\\S]*-----END PGP PUBLIC KEY BLOCK-----", "");
       // region Decode Base64
       byte[] data = Base64.decode(b64Data, Base64.DEFAULT);
       // endregion
@@ -107,7 +107,7 @@ public class Module extends ReactContextBaseJavaModule {
   public void changeKeyPassword(final String key, final String oldPassword, final String newPassword, Promise promise) {
     try {
       // Fix Private Key from iOS version that includes Public Key at the start
-      string privKeyDataFixed = key.replaceAll("-----BEGIN PGP PUBLIC KEY BLOCK-----[\\s\\S]*-----END PGP PUBLIC KEY BLOCK-----", "");
+      String privKeyDataFixed = key.replaceAll("-----BEGIN PGP PUBLIC KEY BLOCK-----[\\s\\S]*-----END PGP PUBLIC KEY BLOCK-----", "");
 
       // region Decode Base64
       PGPSecretKey secKey = PGPUtils.getSecretKey(privKeyDataFixed);
