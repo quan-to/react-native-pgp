@@ -24,11 +24,25 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
+import chevronwrap.Chevronwrap;
+
 public class Module extends ReactContextBaseJavaModule {
   private static int signatureAlgo = HashAlgorithmTags.SHA512;
 
   public Module(ReactApplicationContext reactContext) {
     super(reactContext);
+    Chevronwrap.touch();
+  }
+
+  private String GetKeyFingerprint(String keydata) throws Exception {
+    String fp = Chevronwrap.getKeyFingerprints(keydata);
+    String[] fps = fp.split(",");
+
+    if (fps.length == 0) { // Should never happen, since we added the key and it returned at least one private key. But let's sanity check it.
+      throw new Exception("No private key in specified data");
+    }
+
+    return fps[0];
   }
 
   @ReactMethod
@@ -41,26 +55,59 @@ public class Module extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void verifySignature(final String pubKey, final String data, final String signature, Promise promise) {
-    // TODO
-    promise.reject(new Exception("Not Implemented yet"));
+  public void loadKey(final String keyData, Promise promise) {
+    try {
+      long privateKeysLoaded = Chevronwrap.loadKey(keyData);
+      promise.resolve(privateKeysLoaded);
+    } catch (Exception e) {
+      promise.reject(e);
+    }
   }
 
   @ReactMethod
+  public void unlockKey(final String fingerprint, final String password, Promise promise) {
+    try {
+      Chevronwrap.unlockKey(fingerprint, password);
+      promise.resolve(true);
+    } catch (Exception e) {
+      promise.reject(e);
+    }
+  }
+
+  @ReactMethod
+  @Deprecated
+  public void verifySignature(final String pubKey, final String data, final String signature, Promise promise) {
+    try {
+      Chevronwrap.loadKey(pubKey);
+    } catch (Exception e) {
+      promise.reject(e);
+    }
+    try {
+      boolean result = Chevronwrap.verifySignature(data.getBytes(), signature);
+      promise.resolve(result);
+    } catch (Exception e) {
+      promise.reject(e);
+    }
+  }
+
+  @ReactMethod
+  @Deprecated
   public void signData(final String privKeyData, final String password, final String data, Promise promise) {
     try {
-      // Fix Private Key from iOS version that includes Public Key at the start
+      // Fix Private Key from old iOS version that includes Public Key at the start
       String privKeyDataFixed = privKeyData.replaceAll("-----BEGIN PGP PUBLIC KEY BLOCK-----[\\s\\S]*-----END PGP PUBLIC KEY BLOCK-----", "");
-      // region Decode Private Key
-      PGPSecretKey secKey = PGPUtils.getSecretKey(privKeyDataFixed);
-      PGPPrivateKey privKey = PGPUtils.decryptArmoredPrivateKey(secKey, password);
-      // endregion
-      // region Sign Data
-      String signature = PGPUtils.signArmoredAscii(privKey, data, signatureAlgo);
+
+      long n = Chevronwrap.loadKey(privKeyDataFixed);
+      if (n == 0) {
+        throw new Exception("No private key in specified data");
+      }
+
+      String fingerprint = GetKeyFingerprint(privKeyDataFixed);
+      String signature = Chevronwrap.signData(data.getBytes(), fingerprint);
       WritableMap resultMap = Arguments.createMap();
       resultMap.putString("asciiArmoredSignature", signature);
-      resultMap.putString("hashingAlgo",  PGPUtils.hashAlgoToString(signatureAlgo));
-      resultMap.putString("fingerPrint", Utils.bytesToHex(secKey.getPublicKey().getFingerprint()));
+      resultMap.putString("hashingAlgo",  PGPUtils.hashAlgoToString(HashAlgorithmTags.SHA512)); // Chevron always use SHA512
+      resultMap.putString("fingerPrint", fingerprint);
       promise.resolve(resultMap);
       // endregion
     } catch (Exception e) {
@@ -69,89 +116,69 @@ public class Module extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  @Deprecated
   public void signB64Data(final String privKeyData, final String password, final String b64Data, Promise promise) {
     try {
-      // Fix Private Key from iOS version that includes Public Key at the start
+      // Fix Private Key from old iOS version that includes Public Key at the start
       String privKeyDataFixed = privKeyData.replaceAll("-----BEGIN PGP PUBLIC KEY BLOCK-----[\\s\\S]*-----END PGP PUBLIC KEY BLOCK-----", "");
-      // region Decode Base64
-      byte[] data = Base64.decode(b64Data, Base64.DEFAULT);
-      // endregion
-      // region Decode Private Key
-      PGPSecretKey secKey = PGPUtils.getSecretKey(privKeyDataFixed);
-      PGPPrivateKey privKey = PGPUtils.decryptArmoredPrivateKey(secKey, password);
-      // endregion
-      // region Sign Data
-      String signature = PGPUtils.signArmoredAscii(privKey, data, signatureAlgo);
+
+      long n = Chevronwrap.loadKey(privKeyDataFixed);
+      if (n == 0) {
+        throw new Exception("No private key in specified data");
+      }
+
+      String fingerprint = GetKeyFingerprint(privKeyDataFixed);
+      String signature = Chevronwrap.signBase64Data(b64Data, fingerprint);
       WritableMap resultMap = Arguments.createMap();
       resultMap.putString("asciiArmoredSignature", signature);
-      resultMap.putString("hashingAlgo",  PGPUtils.hashAlgoToString(signatureAlgo));
-      resultMap.putString("fingerPrint", Utils.bytesToHex(secKey.getPublicKey().getFingerprint()));
+      resultMap.putString("hashingAlgo",  PGPUtils.hashAlgoToString(HashAlgorithmTags.SHA512)); // Chevron always use SHA512
+      resultMap.putString("fingerPrint", fingerprint);
       promise.resolve(resultMap);
-      // endregion
     } catch (Exception e) {
       promise.reject(e);
     }
   }
 
   @ReactMethod
+  @Deprecated
   public void setHashingAlgo(final int hashingAlgo) {
-    String hashName = PGPUtils.hashAlgoToString(hashingAlgo); // Man, that's REALLY bad I know. Please FIXME
-    if (hashName.equalsIgnoreCase("unknown")) {
-      throw new IllegalArgumentException("Value " + hashingAlgo + " is not a valid algorithm for hashing.");
-    }
-
-    signatureAlgo = hashingAlgo;
+    Log.e("Quanto PGP", "DEPRECATED CALL setHashingAlgo: Chevron uses fixed SHA512");
   }
 
   @ReactMethod
+  @Deprecated
   public void changeKeyPassword(final String key, final String oldPassword, final String newPassword, Promise promise) {
     try {
       // Fix Private Key from iOS version that includes Public Key at the start
       String privKeyDataFixed = key.replaceAll("-----BEGIN PGP PUBLIC KEY BLOCK-----[\\s\\S]*-----END PGP PUBLIC KEY BLOCK-----", "");
+      String result = Chevronwrap.changeKeyPassword(privKeyDataFixed, oldPassword, newPassword);
 
-      // region Decode Base64
-      PGPSecretKey secKey = PGPUtils.getSecretKey(privKeyDataFixed);
-      // endregion
-      PGPSecretKey reencryptedKey = PGPUtils.reencryptArmoredPrivateKey(secKey, oldPassword, newPassword);
-      ByteArrayOutputStream privateKeyOutputStream = new ByteArrayOutputStream();
-      ArmoredOutputStream armoredPrivOutputStream  = new ArmoredOutputStream(privateKeyOutputStream);
-      reencryptedKey.encode(armoredPrivOutputStream);
-      armoredPrivOutputStream.close();
-      promise.resolve(privateKeyOutputStream.toString("UTF-8"));
+      promise.resolve(result);
     } catch (Exception e) {
       promise.reject(e);
     }
   }
 
   @ReactMethod
+  @Deprecated
   public void generateKeyPair(final String userId, final int numBits, final String passphrase, Promise promise) {
     Log.d("ReactNativePGP", "generateKeyPair");
     try {
+
+      String key = Chevronwrap.generateKey(passphrase, userId, numBits);
+      Chevronwrap.loadKey(key);
+      String fingerprint = GetKeyFingerprint(key);
+
+      String publicKey = Chevronwrap.getPublicKey(fingerprint);
+
       WritableMap resultMap = Arguments.createMap();
-      PGPKeyRingGenerator keyGenerator = PGPUtils.generateKeyRingGenerator(userId, numBits, passphrase.toCharArray());
-
-      // public key
-      PGPPublicKeyRing publicKeyRing              = keyGenerator.generatePublicKeyRing();
-      ByteArrayOutputStream publicKeyOutputStream = new ByteArrayOutputStream();
-      ArmoredOutputStream armoredPubOutputStream  = new ArmoredOutputStream(publicKeyOutputStream);
-
-      publicKeyRing.encode(armoredPubOutputStream);
-      armoredPubOutputStream.close();
-      resultMap.putString("publicKey", publicKeyOutputStream.toString("UTF-8"));
-
-      // private key
-      PGPSecretKeyRing secretKeyRing               = keyGenerator.generateSecretKeyRing();
-      ByteArrayOutputStream privateKeyOutputStream = new ByteArrayOutputStream();
-      ArmoredOutputStream armoredPrivOutputStream  = new ArmoredOutputStream(privateKeyOutputStream);
-
-      secretKeyRing.encode(armoredPrivOutputStream);
-      armoredPrivOutputStream.close();
-      resultMap.putString("privateKey", privateKeyOutputStream.toString("UTF-8"));
-      resultMap.putString("fingerPrint", Utils.bytesToHex(secretKeyRing.getPublicKey().getFingerprint()));
+      resultMap.putString("publicKey", publicKey);
+      resultMap.putString("privateKey", key);
+      resultMap.putString("fingerPrint", fingerprint);
 
       promise.resolve(resultMap);
     } catch(Exception e) {
-      promise.reject(new Exception(e.getMessage()));
+      promise.reject(e);
     }
   }
 

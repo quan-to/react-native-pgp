@@ -11,10 +11,11 @@ buildscript {
     repositories {
         jcenter()
         maven { url "https://maven.google.com" }
+        google()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0'
+        classpath 'com.android.tools.build:gradle:3.4.0'
     }
 }
 
@@ -22,7 +23,6 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 19
@@ -38,10 +38,12 @@ android {
 
 repositories {
     mavenCentral()
+    google()
 }
 
 dependencies {
     compile 'com.facebook.react:react-native:+'
     compile 'org.bouncycastle:bcprov-jdk15on:1.51'
     compile 'org.bouncycastle:bcpg-jdk15on:1.51'
+    compile files('../chevronwrap.aar')
 }
