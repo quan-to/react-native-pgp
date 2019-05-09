@@ -1,5 +1,5 @@
-import PGP from './src/PGP'
+import {NativeModules} from 'react-native';
+// name as defined via ReactContextBaseJavaModule's getName
+const {ReactNativePGP} = NativeModules;
 
-export {
-	PGP
-}
+export default ReactNativePGP;

@@ -42,6 +42,6 @@ repositories {
 }
 
 dependencies {
-    compile 'com.facebook.react:react-native:+'
-    compile files('../chevronwrap.aar')
+    implementation 'com.facebook.react:react-native:+'
+    implementation files('../chevronwrap.aar')
 }
