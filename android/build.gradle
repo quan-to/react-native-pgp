@@ -43,7 +43,5 @@ repositories {
 
 dependencies {
     compile 'com.facebook.react:react-native:+'
-    compile 'org.bouncycastle:bcprov-jdk15on:1.51'
-    compile 'org.bouncycastle:bcpg-jdk15on:1.51'
     compile files('../chevronwrap.aar')
 }

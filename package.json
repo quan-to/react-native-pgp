@@ -1,6 +1,6 @@
 {
   "name": "react-native-pgp",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "description": "React Native OpenPGP for iOS and Android",
   "main": "index.js",
   "repository": {
@@ -11,6 +11,8 @@
     "react-native",
     "openpgp",
     "pgp",
+    "go",
+    "gomobile",
     "library"
   ],
   "directories": {
@@ -20,7 +22,7 @@
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "test": "jest"
   },
-  "author": "Daniel Torres <danielfeelfine@gmail.com>",
+  "author": "Quanto <dev@contaquanto.com>",
   "license": "MIT",
   "peerDependencies": {
     "react-native": ">=0.38.0"
