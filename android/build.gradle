@@ -22,12 +22,12 @@ buildscript {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 26
-        versionCode 1
+        targetSdkVersion 28
+        versionCode 2
         // get version name from package.json version
         versionName computeVersionName()
     }
