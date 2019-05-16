@@ -1,0 +1,8 @@
+framework module "Chevronwrap" {
+	header "ref.h"
+    header "Chevronwrap.objc.h"
+    header "Universe.objc.h"
+    header "Chevronwrap.h"
+
+    export *
+}
