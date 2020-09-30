@@ -62,7 +62,7 @@ console.log(signed.asciiArmoredSignature); // "-----BEGIN PGP SIGNATURE----- ...
 * `signData(asciiArmoredPrivateKey, privateKeyPassword, dataToSign)` - Signs the data using the private key
 * `setHashingAlgo(hashingAlgo)` - Sets the hashing algorithm (check the _Constants_)
 
-### Erros
+### Errors
 
 > TODO
 
